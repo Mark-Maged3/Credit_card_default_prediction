@@ -12,11 +12,8 @@ A train test split was made early on and the EDA was only done on the train set 
 
 ## Data Cleaning
 43 duplicate rows were removed, and undocumented labels were replaced with nulls and imputated using MissForest
+
 ## Feature Engineering & Data Dictionary
-
-To accurately predict credit card defaults, relying solely on static monthly snapshots is insufficient. The feature engineering in this project is designed to capture temporal dynamics, behavioral shifts, and financial momentum. 
-
-The features are generated in the exact order as the code structure below:
 
 ### 1. Core Matrices Setup
 Before creating features, chronological matrices were established for debt and payments. A baseline (0.5% of the credit limit) was introduced to prevent division-by-zero errors and scale metrics appropriately. A half-life decay of 2 months was set to prioritize recent behavior over older behavior.
