@@ -101,10 +101,14 @@ Compares recent behavior (last 2 months) against historical baseline behavior (m
 To capture complex human financial behaviors, this project implements several advanced mathematical formulas from scratch using vectorized NumPy operations:
 
 * **Exponentially Weighted Least Squares (EWLS):** Used to calculate debt and spend momentum. Instead of standard linear regression, EWLS calculates a line of best fit where recent months have a higher "gravitational pull" (using an exponential decay half-life of 2 months). This captures a user's current trajectory much better than an unweighted slope.
+
 * **Theil-Sen Estimator:** Used as a secondary robust momentum metric. It computes the slopes of all possible pairs of time points across the 6 months and takes the median. This makes the momentum feature immune to single-month outliers or data glitches.
+
 * **Median Absolute Deviation (MAD):** Used for Anomaly Detection (Debt Spikes and Spend Shocks). Because financial data is highly skewed, standard Z-scores fail. MAD replaces Mean/Standard Deviation with Median/Median-Deviation, creating a robust anomaly score to flag erratic behavior.
+
 * **Transition Entropy:** Measures the diversity of state changes in a user's repayment status. Rather than treating the history as an unordered bag of values, it operates on first differences, which captures how a user moves between states. A person steadily worsening has low transition entropy, while
 a person oscillating erratically has high transition entropy.
+
 * **Weighted Permutation Entropy:** Calculates the time-series complexity of a
 user's payment and debt histories using sliding windows of size 3. Unlike standard Permutation Entropy, which treats all ordinal patterns equally, the weighted variant scales each pattern's contribution by the amplitude variance within its window, so large swings dominate over noise-level fluctuations.
 Note: In dynamical systems, entropy typically requires large time-series datasets to converge. Because we only have 6 months of data, this feature acts as a local complexity heuristic rather than a true systemic entropy measure.
