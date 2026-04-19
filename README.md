@@ -5,6 +5,8 @@
 
 This project predicts whether a credit card customer will default on their next payment. It uses advanced feature engineering (like debt acceleration, recency-weighted moving averages, and spending anomalies) to track a user's financial behavior over 6 months and feed those insights into a Machine Learning classification model.
 
+## Exploratory data analysis (EDA)
+View the EDA here: https://mark-maged3.github.io/Credit_card_default_prediction/
 
 ## Feature Engineering & Data Dictionary
 
