@@ -11,7 +11,9 @@ A train test split was made early on and the EDA was only done on the train set 
 [📊 View the full EDA report](https://mark-maged3.github.io/Credit_card_default_prediction/)
 
 ## Data Cleaning
-43 duplicate rows were removed, and undocumented labels were replaced with nulls and imputated using MissForest
+There were 40 duplicated entries and all of them are just inactive users so they could just be people with the same demographic except two observstions at indices 11741 and 12430 that are active, so they are the only real duplicates and they will be dropped.
+
+Undocumented labels were replaced with nulls and imputated using MissForest.
 
 ## Feature Engineering & Data Dictionary
 
@@ -79,6 +81,7 @@ Tracks general account usage and inactivity.
 * **`debt_no_variation` & `spend_no_variation`:** Binary flags indicating zero variation in debt/spend (MAD = 0).
 * **`spend_anomaly_score`:** MAD-based score to detect out-of-character spending sprees.
 * **`spend_spike_ratio`:** Ratio of recent peak spending against historical minimum spending. Unlike the Debt Spike Ratio (which can trigger purely from compounding interest and missed payments), this feature specifically isolates active consumer behavior, flagging users who suddenly go on a massive, out-of-character spending spree.
+* **`credit_balance_count`:** Number of months with a credit balance
 
 ### 13. Entropy Features (Predictability)
 Measures the randomness of a user's financial life. High entropy indicates erratic behavior; low entropy indicates routine.
