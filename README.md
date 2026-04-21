@@ -8,10 +8,10 @@ This project predicts whether a credit card customer will default on their next 
 ## Exploratory data analysis (EDA)
 A train test split was made early on and the EDA was only done on the train set to avoid information leakege.
 
-[📊 View the full EDA report](https://mark-maged3.github.io/Credit_card_default_prediction/)
+[📊 View the full EDA report](https://mark-maged3.github.io/Credit_card_default_prediction/eda_report.html)
 
 ## Data Cleaning
-There were 40 duplicated entries and all of them are just inactive users so they could just be people with the same demographic except two observstions at indices 11741 and 12430 that are active, so they are the only real duplicates and they will be dropped.
+There were 26 duplicated entries and all of them are just inactive users so they could just be people with the same demographic except two observstions at indices 11741 and 12430 that are active, so they are the only real duplicates and they will be dropped.
 
 Undocumented labels were replaced with nulls and imputated using MissForest.
 
