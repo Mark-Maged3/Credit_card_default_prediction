@@ -21,61 +21,56 @@ Undocumented labels were replaced with nulls and imputated using MissForest.
 Before creating features, chronological matrices were established for debt and payments. A baseline (0.5% of the credit limit) was introduced to prevent division-by-zero errors and scale metrics appropriately. A half-life decay of 2 months was set to prioritize recent behavior over older behavior.
 
 ### 2. Payoff Ratio Features
-Evaluates how much of the actual debt the user is clearing, rather than just the raw payment amount.
+Evaluate how much of the actual debt the user is clearing, rather than just the raw payment amount.
 * **`payoff_ratio_1` to `5`:** Ratio of lagged payments to the previous bill.
 * **`mean_payoff_ratio`:** The 6-month average payoff ratio.
 * **`full_payment_count`:** Count of months where the user paid >= 95% of their bill. *(Note: A 95% threshold is used instead of 100% to account for users paying their "Statement Balance" rather than their "Current Balance", mental rounding habits, and floating-point irregularities. Behaviorally, a 95%+ payment indicates full capacity to pay).*
 * **`micro_payment_count` & `zero_payment_count`:** Tracks minimum payments (<= 10%) and missed payments.
 
 ### 3. Exponentially Weighted Moving Averages (EWMA)
-Applies time-decay weights so that recent months impact the average more heavily than older months.
+Apply time-decay weights so that recent months impact the average more heavily than older months.
 * **`ewma_payments` & `ewma_debt`:** Recency-weighted averages of payments and debts.
 * **`ewma_payment_to_bill_ratios`:** A recency-weighted ratio of how well the user is covering their active debt.
 * **`ewma_utilization`:** Recency-weighted average of credit utilization.
 
 ### 4. Debt Momentum Features
-Treats debt as a trajectory to measure how fast it is growing or shrinking over time.
-* **`debt_momentem`:** Uses Theil-Sen robust slopes to calculate normalized momentum, ignoring extreme outliers.
-* **`ewls_debt_momentum`:** Calculates debt momentum using Exponentially Weighted Least Squares (EWLS), weighting recent trajectory shifts more heavily.
+Treat debt as a trajectory to measure how fast it is growing or shrinking over time and its acceleration.
+* **`debt_momentem`:** Uses Theil-Sen robust slopes to calculate robust momentum, ignoring extreme outliers. it measures the percentage change of debt per month.
+* **`norm_debt_momentem`:** Uses Theil-Sen to measure the absolute change of debt per month relative to credit limit.
+* **`norm_debt_momentem_shift`:** Calculates the momentum of the first and last 3 months seperatly and measures the change between the two periods relative to credit limit.
+* **`norm/ewls_debt_momentum`:** Calculates debt momentum using Exponentially Weighted Least Squares (EWLS), weighting recent trajectory shifts more heavily and compares it to credit limit.
 
-### 5. Debt Acceleration Features
-Calculates the second derivative of a user's debt trajectory to measure if debt growth is speeding up.
-* **`debt_accel_positive_count`:** How many times the user's debt growth accelerated.
-* **`norm_debt_acceleration_mean`:** The average acceleration normalized against their total credit limit.
-
-### 6. Debt Spike & Anomaly Detection
+### 5. Debt Spike & Anomaly Detection
 * **`debt_spike_ratio`:** Ratio of recent peak debt against historical minimum debt.
 * **`debt_anomaly_score`:** Uses Median Absolute Deviation (MAD) to detect sudden, abnormal spikes in a user's current debt compared to their standard baseline.
 
-### 7. Payment Volatility Features
+### 6. Payment Volatility Features
 * **`payment_volatility` & `relative_payment_volatility`:** Standard deviation of a user's payments (normalized).
-* **`recent_payment_momentum`:** The first derivative of chronological payments to see if payment sizes are actively trending up or down.
 
-### 8. Credit Utilization Features
+
+### 7. Credit Utilization Features
 * **`max_credit_utilization`:** peak percentage of the credit limit used.
-* **`ewls_utilization_burn_rate`:** How fast the user is actively eating into their credit limit.
 * **`recent_remaining_liquidity`:** Exact dollar amount of credit available in the most recent month.
-* **`utilization_shock_recent`:** Sudden jumps in utilization.
 
-### 9. Delinquency Features
+### 8. Delinquency Features
 Deep-dive into the user's late payment (PAY_X) statuses.
 * **`ewma_pay_status` & `max_delinquency`:** Recency-weighted and maximum late statuses.
 * **`delinquency_severity` & `delinquency_frequency`:** The total sum and count of late payment months.
 * **`months_since_last_delinquency`:** Tracks how recently the user was late (6 = no recent delinquencies).
 * **`max_delinquency_escalation`:** Tracks the maximum jump in delinquency (e.g., escalating from 1 month late to 3 months late).
 
-### 10. Age-Related Features
+### 9. Age-Related Features
 Captures risk associated with demographics and life stages.
 * **`limit_to_age_ratio` & `age_adjusted_utilization`:** Normalizes credit limits and EWMA utilization against the user's age.
 
-### 11. New Spend Features
+### 10. New Spend Features
 The raw dataset only provides "Bill Amount" (a mix of previous debt and new purchases). This section reverse-engineers the **actual new monthly spending**.
 * **`new_spends1` to `5` & `total_new_spend`:** Extracting actual new purchases made each month.
 * **`ewma_spends` & `ewls_spend_momentum`:** Recency-weighted average of new spends and the trajectory/momentum of their spending habits.
 * **`total_spend_to_limit_ratio`:** Total new spend over the period divided by credit limit.
 
-### 12. Activity & Variation Features
-Tracks general account usage and inactivity.
+### 11. Activity & Variation Features
+Track general account usage and inactivity.
 * **`active_debt_months` & `active_spend_months`:** Count of months the user carried debt or made purchases.
 * **`consecutive_zero_payments`:** Longest streak of no payments.
 * **`debt_no_variation` & `spend_no_variation`:** Binary flags indicating zero variation in debt/spend (MAD = 0).
@@ -83,15 +78,15 @@ Tracks general account usage and inactivity.
 * **`spend_spike_ratio`:** Ratio of recent peak spending against historical minimum spending. Unlike the Debt Spike Ratio (which can trigger purely from compounding interest and missed payments), this feature specifically isolates active consumer behavior, flagging users who suddenly go on a massive, out-of-character spending spree.
 * **`credit_balance_count`:** Number of months with a credit balance
 
-### 13. Entropy Features (Predictability)
-Measures the randomness of a user's financial life. High entropy indicates erratic behavior; low entropy indicates routine.
+### 12. Entropy Features (Predictability)
+Measure the randomness of a user's financial life. High entropy indicates erratic behavior; low entropy indicates routine.
 * **`PAY_STATUS_ENTROPY` (Shannon entropy of state changes):** Measures how chaotic a user's delinquency statuses are.
 * **`payment_entropy` & `debt_entropy` (Permutation):** Time-series complexity metrics detecting if a user has a stable financial routine or highly chaotic fluctuations.
 
-### 14. Pay Status Reversal Features
+### 13. Pay Status Reversal
 * **`pay_status_reversals`:** Tracks the number of times a user flips back and forth between paying on time and falling behind (a strong indicator of financial distress).
 
-### 15. Behavioral Shift Features
+### 14. Behavioral Shift Features
 Compares recent behavior (last 2 months) against historical baseline behavior (months 3-6).
 * **`payoff_behavior_shift`:** Did the user suddenly stop paying off their balances?
 * **`spend_behavior_shift`:** Did the user suddenly start spending much more or much less than usual?
